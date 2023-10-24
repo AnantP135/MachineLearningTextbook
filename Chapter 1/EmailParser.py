@@ -71,3 +71,4 @@ def load(path):
     if len(tokens) > 2:
         return [stemmer.stem(w) for w in tokens if w not in stopwords]
     return []
+ 
