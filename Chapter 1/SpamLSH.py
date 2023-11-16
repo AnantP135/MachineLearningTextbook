@@ -1,7 +1,8 @@
 import os
 import pickle
-# import email_read_util
+import EmailParser
 from datasketch import MinHash, MinHashLSH
+from IPython.display import HTML, display
 
 DATA_DIR = 'datasets/trec07p/data'
 LABELS_FILE = 'datasets/trec07p/index'
@@ -41,7 +42,7 @@ for idx, f in enumerate(spam_files):
     ## Get a 128 Bit hash?
     minhash = MinHash(num_perm = 128)
     ## Loads the path using the function defined earlier
-    stems = load(os.path.join(DATA_DIR, f))
+    stems = EmailParser.load(os.path.join(DATA_DIR, f))
     ## Checks to see if there is something in stems
     if len(stems) < 2: continue
     for s in stems:
@@ -65,3 +66,46 @@ def lsh_predict_label(stems):
         return 0
     else:
         return 1
+
+fp = 0
+tp = 0
+fn = 0
+tn = 0
+
+for filename in X_test:
+    path = os.path.join(DATA_DIR, filename)
+    if filename in labels:
+        label = labels[filename]
+        stems = EmailParser.load(path)
+        if not stems:
+            continue
+        pred = lsh_predict_label(stems)
+        if pred == -1:
+            continue
+        elif pred == 0:
+            if label == 1:
+                fp = fp + 1
+            else:
+                tp = tp + 1
+        elif pred == 1:
+            if label == 1:
+                tn = tn + 1
+            else:
+                fn = fn + 1
+
+conf_matrix = [[tn, fp],
+               [fn, tp]]
+display(HTML('<table><tr>{}</tr></table>'.format(
+    '</tr><tr>'.join('<td>{}</td>'.format(
+        '</td><td>'.join(str(_) for _ in row))
+                     for row in conf_matrix))))
+
+count = tn + tp + fn + fp
+percent_matrix = [["{:.1%}".format(tn/count), "{:.1%}".format(fp/count)],
+                  ["{:.1%}".format(fn/count), "{:.1%}".format(tp/count)]]
+display(HTML('<table><tr>{}</tr></table>'.format(
+    '</tr><tr>'.join('<td>{}</td>'.format(
+        '</td><td>'.join(str(_) for _ in row))
+                     for row in percent_matrix))))
+
+print("Classification accuracy: {}".format("{:.1%}".format((tp+tn)/count)))

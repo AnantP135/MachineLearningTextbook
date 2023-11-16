@@ -24,4 +24,3 @@ clf.fit(X_train, y_train)
 y_pred = clf.predict(X_test)
 print(accuracy_score(y_pred, y_test))
 print(confusion_matrix(y_test, y_pred))
-

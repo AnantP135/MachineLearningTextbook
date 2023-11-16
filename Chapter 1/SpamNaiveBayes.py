@@ -1,5 +1,5 @@
 import os
-# import email_read_util
+import EmailParser
 import email
 
 from sklearn.model_selection import train_test_split
